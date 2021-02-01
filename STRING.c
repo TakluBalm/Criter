@@ -64,7 +64,9 @@ string getstr(char *msg, int show){
         current->value = temp;
         if (show == 1){
             for (int k = 0; k < j; k++) printf("\b");
-            strprint(str, 0);
+            str.end->value = '\0';
+            strprint(str);
+            str.end->value = '\n';
             for (int k = 0; k < (i-j); k++) printf("\b");
         }
         else printf("*");
@@ -86,20 +88,11 @@ void freestr(string str){
     }
 }
 
-void strprint(string str, int newline){
-    node *current = str.start->next;
-    if (newline == 1){    
-        while(1){
-            printf("%c", current->value);
-            if (current->next != NULL) current = current->next;
-            else break;
-        }
-    }
-    else{
-        while(1){
-            printf("%c",current->value);
-            if (current->next != str.end) current = current->next;
-            else break;
-        }
+void strprint(string str){
+    node *current = str.start->next;  
+    while(1){
+        printf("%c", current->value);
+        if (current->next != NULL) current = current->next;
+        else break;
     }
 }
