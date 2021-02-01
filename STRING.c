@@ -6,55 +6,100 @@
 
 //         STRING-RELATED FUNCTION IMPLEMENTATIONS
 
-string getstring(char *msg, int show, char EOS){
+string getstr(char *msg, int show){
     printf("%s", msg);
-    node *current = NULL, *mediator = NULL;
     string str;
-    int i=0,lines = 0, flag = 0;
+    do
+    str.start = (node*) malloc(sizeof(node));
+    while (str.start == NULL);
+    do 
+    str.end = (node*) malloc(sizeof(node));
+    while (str.end == NULL);   
+    str.start->next = str.end; str.end->prev = str.start;
+    str.start->prev = str.end->next = NULL; 
+    str.start->value = '\0'; str.end->value = '\n';
+    node *current = str.start, *mediator = NULL;
+    int i=0, j = 0;
     while(1){
         int temp = getch();
-        if (temp == EOS) break;
-        else if (temp == 10) {lines++; i=0;}
+
+        // Processing the read character
+        if (temp == '\n') {printf("\n"); break;}
         else if (temp == 127){
-            if (current->prev == NULL) continue;
+            if (current == str.start) continue;
             printf("\b \b");
             current = current->prev;
-            str.end = current;
-            free(current->next);
-            current->next = NULL;
+            current->next = (current->next)->next; 
+            free((current->next)->prev);
+            (current->next)->prev = current;
+            i--;j--;
             continue;
         }
-        if (show == 1) printf("%c", temp);
-        else printf("*");
+        else if (temp == 27){
+            temp = getch();
+            if (temp == 91)
+            {
+                temp = getch();
+                if (temp == 67){
+                    if (current->next == str.end) continue;
+                    else current = current->next;
+                    printf("\033[C");
+                    j--;
+                    continue;
+                }
+                if (temp == 68){
+                    if (current->prev == str.start || current->prev == NULL) continue;
+                    else current = current->prev;
+                    printf("\033[D");
+                    j--;
+                    continue;
+                }
+            }
+        }
+
+        // Adding and printing the processed character
         mediator = (node*) malloc(sizeof(node));
-        if (i != 0) current->next = mediator;
-        else str.start = mediator;
-        mediator->prev = current;
-        current = mediator;
+        mediator->next = current->next; mediator->prev = current;
+        current = current->next = (current->next)->prev = mediator;
         current->value = temp;
-        current->next = NULL;
-        str.end = current;
-        i++;
+        if (show == 1){
+            for (int k = 0; k < j; k++) printf("\b");
+            strprint(str, 0);
+            for (int k = 0; k < (i-j); k++) printf("\b");
+        }
+        else printf("*");
+        i++;j++;
     }
-    printf("\n"); return str;
+    str.length = i; return str;
 }
 
-void freestring(string str){
-    node *current = str.end;
-    node *prev = current->prev;
-    while (prev != NULL){
+void freestr(string str){
+    node *current = str.start, *next = str.start->next;
+    while(1){
         free(current);
-        current = prev;
-        prev = current->prev;
+        if (next->next == NULL){
+            free(next);
+            break;
+        }
+        current = next;
+        next = next->next;
     }
-    free(current);
 }
 
-void strprint(string str){
-    node *current = str.start;
-    while(current->next != NULL){
-        printf("%c", current->value);
-        current = current->next;
+void strprint(string str, int newline){
+    node *current = str.start->next;
+    if (newline == 1){    
+        while(1){
+            printf("%c", current->value);
+            if (current->next != NULL) current = current->next;
+            else break;
+        }
     }
-    printf("%c\n", current->value);
+    else{
+        while(1){
+            printf("%c",current->value);
+            if (current->next != str.end) current = current->next;
+            else break;
+        }
+    }
 }
