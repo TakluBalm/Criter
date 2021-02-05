@@ -7,23 +7,39 @@
 //      Custom structs
 
 typedef struct node{
-    char value;
+    int value;
     struct node *next;
     struct node *prev;
 }node;
 typedef struct string{
+    int length, cursor;
     node *start;
     node *end;
 }string;
 
+// A line is like a node but instead of charcter it contains a whole string
+typedef struct line{        
+    string value;
+    struct line* next;
+    struct line* prev;
+}line;
+typedef struct text{
+    int lines;
+    line* start;
+    line* end;
+}text;
 
 //          FUNCTIONS IN THIS HEADER
 
 int getch();
-string getstring(char *msg, int show, char EOS);
-void freestring(string str);
+string initstr();
+string getstr(char *msg, int show);
+void editstr(string str, int j);
+void freestr(string str);
 void strprint(string str);
-void mvcurrent(char dir, node* current, int current_line, int chars, string str);
+text getxt();
+void freetxt(text txt);
+void printxt(text txt);
 
 //          I/O FUNCTIONS
 int getch(){
@@ -38,3 +54,4 @@ int getch(){
 }
 
 #include "STRING.c"
+#include "WRITER.c"
