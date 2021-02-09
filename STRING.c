@@ -4,69 +4,15 @@
 #endif
 
 
-void insert(string str, int show, int i, int j);
 
 //         STRING-RELATED FUNCTION IMPLEMENTATIONS
 
-string getstr(char *msg, int show){
+string getstr(char *msg, int show){        // SHOW: 0->Password 1->Normal text  2->No output on screen
     printf("%s", msg);
     string str = initstr();
     node *current = str.start, *mediator = NULL;
     int i=0, j = 0;
-    while(1){
-        int temp = getch();
-
-        // Processing the read character
-        if (temp == '\n') {printf("\n"); str.start->value = 'N'; break;}
-        else if (temp == 127){
-            if (current == str.start) continue;
-            printf("\b \b");
-            current->next->prev = current->prev;
-            current->prev->next = current->next;
-            mediator = current; current = current->prev; 
-            free(mediator);
-            i--;j--;
-            insert(str, show, i, j);
-            continue;
-        }   
-        else if (temp == 27){                                                   // 27 is ascii of Esc key
-            temp = getch();
-            if (temp == 91){                                                    // 91 is the ascii of open square bracket [
-                temp = getch();
-                if (temp == 67){                                                // In terminal when you press arrow key the input signal is actually 27 91 (65/66/67/68)
-                    if (current->next == str.end) continue;
-                    else current = current->next;
-                    printf("\033[C"); // '\033' means print the character with ascii value 33 in octal notation (27 in decimal)
-                    j++;
-                    continue;
-                }
-                if (temp == 68){
-                    if (current == str.start) continue;
-                    else current = current->prev;
-                    printf("\033[D");
-                    j--;
-                    continue;
-                }
-                if (temp == 65 || temp == 66){
-                    str.start->value = (temp == 65)?'U':'D';
-                    break;
-                }
-            }
-            if (temp == 27){
-                str.start->value = 'L';
-                break;
-            }
-        }
-
-        // Adding and printing the processed character
-        mediator = (node*) malloc(sizeof(node));
-        mediator->next = current->next; mediator->prev = current;
-        current = current->next = (current->next)->prev = mediator;
-        current->value = temp;
-        insert(str, show, i, j);
-        i++;j++;
-    }
-    str.length = i; str.cursor = j;
+    str = editstr(str, str.length, show);
     return str;
 }
 
@@ -74,14 +20,14 @@ string getstr(char *msg, int show){
 
 void insert(string str, int show, int i, int j){
     if (show == 1){
-        for (int k = 0; k <i-j; k++) printf("\033[C");
+        for (int k = 0; k <(i-j +1); k++) printf("\033[C");
+        for (int k = 0; k < (i+1); k++) printf("\b \b");
         str.end->value = '\0';
-        printf("\r"); // \r deletes the output of the line behind the cursor
         strprint(str);
         str.end->value = '\n';
         for (int k = 0; k < (i-j); k++) printf("\b"); // \b char moves the cursor back one space
     }
-    else {
+    else if (show == 0){
         for (int k = 0; k < (i-j); k++) printf("\033[C");
         printf("*");
         for (int k = 0; k < (i-j); k++) printf("\b");
@@ -107,47 +53,36 @@ void freestr(string str){
 
 void strprint(string str){
     node *current = str.start->next;  
-    while(1){
+    while(current != str.end){
         printf("%c", current->value);
-        if (current->next != NULL) current = current->next;
-        else break;
+        current = current->next;
     }
+    if (current->value == '\n') printf("%c", current->value);
 }
 
 //           --------------------------editstr()-----------------------
 
-void editstr(string str, int j){
-    str.start->value = '\0';
+string editstr(string str, int j, int show){
     int i = str.length;
     if (j > i) j = i;
-    int del = i-j;
-    node *mediator = NULL, *current;
-    if (j < del){
-        current = str.start; 
-        for (int k = 0; k < j && current->next != str.end; k++){current = current->next;}
-    }
-    else{
-        current = str.end->prev;
-        for (int k = 0; k < del && current != str.start; k++){current = current->prev;}
-    }
-    insert(str, 1, i, j);
-
-/*-----------------------------SAME CODE AS THE CORE OF getstr() BUT WITH PRESET VALUE OF current AND j---------------------------------------------*/ 
-
+    node *mediator = NULL, *current = str.start; 
+    for (int k = 0; k < j; k++) current = current->next;
+    insert(str, show, i, j);
     while(1){
         int temp = getch();
 
         // Processing the read character
-        if (temp == '\n') {printf("\n"); str.start->value = 'N'; break;}
+        if (temp == '\n') {if (show != 2) printf("\n"); str.start->value = 'N'; break;}
+        else if (temp == EOF) {str.start->value = 'L'; break;}
         else if (temp == 127){
-            if (current == str.start) continue;
+            if (current == str.start) {str.start->value = 'R'; break;}
             printf("\b \b");
             current->next->prev = current->prev;
             current->prev->next = current->next;
             mediator = current; current = current->prev; 
             free(mediator);
             i--;j--;
-            insert(str, 1, i, j);
+            insert(str, show, i, j);
             continue;
         }   
         else if (temp == 27){
@@ -172,6 +107,18 @@ void editstr(string str, int j){
                     str.start->value = (temp == 65)?'U':'D';
                     break;
                 }
+                if (temp == 51) {
+                    temp = getch();
+                    if (temp == 126){
+                        current = current->next; printf("\033[C\b \b");
+                        current->next->prev = current->prev;
+                        current->prev->next = current->next;
+                        mediator = current; current = current->prev; 
+                        free(mediator);i--;
+                        insert(str, show, i, j);
+                        continue;
+                    }
+                }
             }
             if (temp == 27){
                 str.start->value = 'L';
@@ -184,10 +131,11 @@ void editstr(string str, int j){
         mediator->next = current->next; mediator->prev = current;
         current = current->next = (current->next)->prev = mediator;
         current->value = temp;
-        insert(str, 1, i, j);
+        insert(str, show, i, j);
         i++;j++;
     }
-    str.length = i; str.cursor = j;    
+    str.length = i; str.cursor = j;
+    return str;    
 }
 
 //      ------------------------------------------initstr()--------------------------------------
@@ -203,5 +151,32 @@ string initstr(){
     str.start->next = str.end; str.end->prev = str.start;
     str.start->prev = str.end->next = NULL; 
     str.start->value = '\0'; str.end->value = '\n';
+    str.length = 0; str.cursor = 0;
     return str;
+}
+
+//      -----------------------------------------concatnate()------------------------------------
+
+string concatnate(string str1, string str2){
+    string str;
+    str.start = str1.start; str.end = str2.end;
+    str.length = str1.length + str2.length;
+    str1.end->prev->next = str2.start->next;
+    str2.start->next->prev = str1.end->prev;
+    free(str1.end); free(str2.start);
+    return str; 
+}
+
+//      ------------------------------------------breakstr()--------------------------------------
+
+string breakstr(string *str, int j){
+    string str2; str2.end = str->end; str2.length = str->length - j; str2.cursor = 0;
+    node *current = str->start, *start = (node*) malloc(sizeof(node)), *end = (node*) malloc(sizeof(node));
+    for (int k = 0; k < j; k++) current = current->next;
+    end->prev = current; end->next = NULL; start->next = current->next; start->prev = NULL;
+    end->value = '\n'; start->value = '\0';
+    end->prev->next = end; start->next->prev = start;
+    str->end = end; str->cursor = str->length = j;
+    str2.start = start; 
+    return str2;
 }
