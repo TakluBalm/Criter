@@ -5,11 +5,12 @@
 
 int main(int argc, char* argv[]){
     if (argc < 2){
-        printf("Syntax: ./criter [filename]\n");
+        printf("Syntax: criter [filename]\n");
         return 1;
     }
-    if (argc > 2) printf("Only the the first argument will be considered.\n");
-    printf("Opening %s\n", argv[1]);
+    printf("\033[D\033[J");
+    if (argc > 2) printf("Only the the first argument will be considered.\n\n");
+    printf("Opening %s ...\n", argv[1]);
     FILE *fd = fopen(argv[1], "r"), *temp;
     text txt = initxt();
     if (fd != NULL){
@@ -17,7 +18,7 @@ int main(int argc, char* argv[]){
         stdin = fd;
         txt = editxt(txt, txt.lines, 2);
         stdin = temp;
-        printf("The Buffer has been loaded(Press Esc twice to save and leave):\n\n");
+        printf("The Buffer has been loaded(Press Esc twice to save and leave):\n");
         printxt(txt);
         fclose(fd);
     }
@@ -32,6 +33,7 @@ int main(int argc, char* argv[]){
     printxt(txt);
     (txt.end->prev->value).end->value = '\n';
     stdout = temp;
+    printf("Your buffer was sucessfully saved.\n");
     freetxt(txt);
     fclose(fd);
 }

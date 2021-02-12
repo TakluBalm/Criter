@@ -116,16 +116,17 @@ text editxt(text txt, int j, int show){
             current->value = getstr("", show);
             i++;j++; break;
         }
-        }
-        if ((current->value).start->value == 'L'){
+        case ('L'): {
             (current->value).start->value = '\0';
             if (show != 2) {
                 for (int k = 0; k < (i-j+1); k++) printf("\033[B"); 
                 printf("\r");
             }
-            break;
+            goto cleanup;
+        }
         }
     }
+    cleanup:
     txt.lines = i; return txt;
 }
 
