@@ -26,8 +26,8 @@ int main(int argc, char* argv[]){
         printf("No file of such name exists.\nCreating new file.\n");
         printf("The Buffer has been loaded(Press Esc twice to save and leave):\n\n");
     }
-    fd = fopen(argv[1], "w");
     txt = editxt(txt, txt.lines, 1);
+    fd = fopen(argv[1], "w");
     temp = stdout; stdout = fd;
     (txt.end->prev->value).end->value = '\0';
     printxt(txt);
