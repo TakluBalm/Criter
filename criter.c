@@ -1,5 +1,4 @@
 #ifndef __MYFUNCS
-#define __MYFUNCS
 #include "MyFuncs.h"
 #endif
 
@@ -18,13 +17,15 @@ int main(int argc, char* argv[]){
         stdin = fd;
         txt = editxt(txt, txt.lines, 2);
         stdin = temp;
-        printf("The Buffer has been loaded(Press Esc twice to save and leave):\n");
+        printf("The Buffer has been loaded(Press Esc twice to save and leave):\n\n");
+        printf("=======================================================================\n\n");
         printxt(txt);
         fclose(fd);
     }
     else {
         printf("No file of such name exists.\nCreating new file.\n");
         printf("The Buffer has been loaded(Press Esc twice to save and leave):\n\n");
+        printf("=======================================================================\n\n");
     }
     txt = editxt(txt, txt.lines, 1);
     fd = fopen(argv[1], "w");
@@ -33,7 +34,9 @@ int main(int argc, char* argv[]){
     printxt(txt);
     (txt.end->prev->value).end->value = '\n';
     stdout = temp;
+    printf("=======================================================================\n");
     printf("Your buffer was sucessfully saved.\n");
     freetxt(txt);
     fclose(fd);
 }
+

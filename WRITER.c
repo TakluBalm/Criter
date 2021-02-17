@@ -1,38 +1,6 @@
 #ifndef __MYFUNCS
-#define __MYFUNCS
-#include"MyFuncs.h"
+#include "MyFuncs.h"
 #endif
-
-//  ------------------------------------  getxt()  ---------------------------------------------------
-
-text getxt(int show){
-    text txt = initxt();
-    line *current = txt.start, *mediator = NULL;
-    editxt(txt, txt.lines, show);
-    return txt;
-}
-
-//  -------------------------------------  printxt()  ------------------------------------------------
-
-void printxt(text txt){
-    line* current = txt.start->next;
-    while (current != txt.end){
-        strprint(current->value);
-        current = current->next;
-    }
-}
-
-//  -------------------------------------  freetxt()  ------------------------------------------------
-
-void freetxt(text txt){
-    line* current = txt.end->prev;
-    while(current != txt.start){
-        freestr(current->value);
-        current = current->prev;
-        free(current->next);
-    }
-    freestr(txt.start->value);free(txt.end); free(txt.start);
-}
 
 //  --------------------------------------  editxt()  ------------------------------------------------
 
@@ -128,6 +96,37 @@ text editxt(text txt, int j, int show){
     }
     cleanup:
     txt.lines = i; return txt;
+}
+
+//  ------------------------------------  getxt()  ---------------------------------------------------
+
+text getxt(int show){
+    text txt = initxt();
+    line *current = txt.start, *mediator = NULL;
+    editxt(txt, txt.lines, show);
+    return txt;
+}
+
+//  -------------------------------------  printxt()  ------------------------------------------------
+
+void printxt(text txt){
+    line* current = txt.start->next;
+    while (current != txt.end){
+        strprint(current->value);
+        current = current->next;
+    }
+}
+
+//  -------------------------------------  freetxt()  ------------------------------------------------
+
+void freetxt(text txt){
+    line* current = txt.end->prev;
+    while(current != txt.start){
+        freestr(current->value);
+        current = current->prev;
+        free(current->next);
+    }
+    freestr(txt.start->value);free(txt.end); free(txt.start);
 }
 
 //  --------------------------------------  initxt()  ------------------------------------------------

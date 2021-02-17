@@ -1,11 +1,95 @@
 #ifndef __MYFUNCS
-#define __MYFUNCS
 #include"MyFuncs.h"
 #endif
 
 
+//           --------------------------editstr()-----------------------
 
-//         STRING-RELATED FUNCTION IMPLEMENTATIONS
+string editstr(string str, int j, int show){
+    int i = str.length;
+    if (j > i) j = i;
+    node *mediator = NULL, *current = str.start; 
+    for (int k = 0; k < j; k++) current = current->next;
+    insert(str, show, i, j);
+    while(1){
+        int temp = getch();
+        switch(temp){
+
+            // Processing the read character
+            case ('\n'):{if (show != 2) printf("\n"); str.start->value = 'N'; goto end;}
+            case (EOF):{str.start->value = 'L'; goto end;}
+            case (127):{                              // ASCII for Backspace
+                if (current == str.start) {str.start->value = 'R'; goto end;}
+                printf("\b \b");
+                current->next->prev = current->prev;
+                current->prev->next = current->next;
+                mediator = current; current = current->prev; 
+                free(mediator);
+                i--;j--;
+                insert(str, show, i, j);
+                break;
+            } 
+            case (27):{                               // 27 is ASCII for ESC character
+                temp = getch();
+                if (temp == 91){                                // 91 is ASCII for [ character
+                    switch(temp = getch()){
+                        case (67):{
+                            if (current->next == str.end) continue;
+                            else current = current->next;
+                            printf("\033[C");
+                            j++;
+                            continue;
+                        }
+                        case (68):{
+                            if (current == str.start) continue;
+                            else current = current->prev;
+                            printf("\033[D");
+                            j--;
+                            continue;
+                        }
+                        case (65):
+                        case (66):{
+                            str.start->value = (temp == 65)?'U':'D';
+                            goto end;
+                        }
+                        case(51):{
+                            temp = getch();
+                            if (temp == 126){
+                                current = current->next; printf("\033[C\b \b");
+                                current->next->prev = current->prev;
+                                current->prev->next = current->next;
+                                mediator = current; current = current->prev; 
+                                free(mediator);i--;
+                                insert(str, show, i, j);
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (temp == 27){
+                    str.start->value = 'L';
+                    goto end;
+                }
+            }
+
+            // Adding and printing the processed character
+            default:{
+                mediator = (node*) malloc(sizeof(node));
+                mediator->next = current->next; mediator->prev = current;
+                current = current->next = (current->next)->prev = mediator;
+                current->value = temp;
+                insert(str, show, i, j);
+                i++;j++;
+            }
+        }
+        continue;
+    }
+    end:
+    str.length = i; str.cursor = j;
+    return str;    
+}
+
+//           --------------------------getstr()--------------------------
 
 string getstr(char *msg, int show){        // SHOW: 0->Password 1->Normal text  2->No output on screen
     printf("%s", msg);
@@ -58,84 +142,6 @@ void strprint(string str){
         current = current->next;
     }
     if (current->value == '\n') printf("%c", current->value);
-}
-
-//           --------------------------editstr()-----------------------
-
-string editstr(string str, int j, int show){
-    int i = str.length;
-    if (j > i) j = i;
-    node *mediator = NULL, *current = str.start; 
-    for (int k = 0; k < j; k++) current = current->next;
-    insert(str, show, i, j);
-    while(1){
-        int temp = getch();
-
-        // Processing the read character
-        if (temp == '\n') {if (show != 2) printf("\n"); str.start->value = 'N'; break;}
-        else if (temp == EOF) {str.start->value = 'L'; break;}
-        else if (temp == 127){
-            if (current == str.start) {str.start->value = 'R'; break;}
-            printf("\b \b");
-            current->next->prev = current->prev;
-            current->prev->next = current->next;
-            mediator = current; current = current->prev; 
-            free(mediator);
-            i--;j--;
-            insert(str, show, i, j);
-            continue;
-        }   
-        else if (temp == 27){
-            temp = getch();
-            if (temp == 91){
-                temp = getch();
-                if (temp == 67){
-                    if (current->next == str.end) continue;
-                    else current = current->next;
-                    printf("\033[C");
-                    j++;
-                    continue;
-                }
-                if (temp == 68){
-                    if (current == str.start) continue;
-                    else current = current->prev;
-                    printf("\033[D");
-                    j--;
-                    continue;
-                }
-                if (temp == 65 || temp == 66){
-                    str.start->value = (temp == 65)?'U':'D';
-                    break;
-                }
-                if (temp == 51) {
-                    temp = getch();
-                    if (temp == 126){
-                        current = current->next; printf("\033[C\b \b");
-                        current->next->prev = current->prev;
-                        current->prev->next = current->next;
-                        mediator = current; current = current->prev; 
-                        free(mediator);i--;
-                        insert(str, show, i, j);
-                        continue;
-                    }
-                }
-            }
-            if (temp == 27){
-                str.start->value = 'L';
-                break;
-            }
-        }
-
-        // Adding and printing the processed character
-        mediator = (node*) malloc(sizeof(node));
-        mediator->next = current->next; mediator->prev = current;
-        current = current->next = (current->next)->prev = mediator;
-        current->value = temp;
-        insert(str, show, i, j);
-        i++;j++;
-    }
-    str.length = i; str.cursor = j;
-    return str;    
 }
 
 //      ------------------------------------------initstr()--------------------------------------

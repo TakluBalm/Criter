@@ -3,6 +3,7 @@
 #include <termio.h>
 #include <unistd.h>
 
+#define __MYFUNCS
 
 //      Custom structs
 
@@ -41,7 +42,7 @@ string editstr(string str, int j, int show);// Edits the contents of an initiali
 string breakstr(string* str, int j);        // Takes the string and breaks it into two. Returns the right broken string while the left one stays in the original 
 void freestr(string str);                   // Frees all the heap memory allocated by the above functions 
 void strprint(string str);                  // Prints the content of a string to the screen
-
+int stringcmp(string s1, string s2);           // Checks the strings for equality
 void insert(string str, int show, int i, int j);    // To support visual insertion of characters in the string
 
 
@@ -50,18 +51,3 @@ text getxt(int show);                       // Initialises and takes texxt input
 text editxt(text txt, int j, int show);     // Edits the contents of an initialised text
 void freetxt(text txt);                     // Frees all the allocated memory by the initxt(), getxt() and editxt() functions
 void printxt(text txt);                     // Prints the contents of 'txt' on the screen
-
-//          I/O FUNCTIONS
-int getch(){
-    struct termios updated, old;
-    tcgetattr(STDIN_FILENO, &old);
-    updated=old;
-    updated.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &updated);
-    int c = getchar();
-    tcsetattr(STDIN_FILENO, TCSANOW, &old);
-    return c;
-}
-
-#include "STRING.c"
-#include "WRITER.c"
