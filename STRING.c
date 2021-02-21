@@ -1,26 +1,36 @@
-#ifndef __MYFUNCS
-#include"MyFuncs.h"
-#endif
+#include "__string.h"
+#include "__io.h"
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 
 //           --------------------------editstr()-----------------------
 
 string editstr(string str, int j, int show){
     int i = str.length;
     if (j > i) j = i;
-    node *mediator = NULL, *current = str.start; 
-    for (int k = 0; k < j; k++) current = current->next;
+    node *mediator = NULL, *current = NULL; 
+    if(j-i > j){
+        current = str.start;
+        for (int k = 0; k < j; k++) current = current->next;
+    } else{
+        current = str.end;
+        for (int k = 0; k < (i-j); k++) current = current->prev;
+    }
     insert(str, show, i, j);
     while(1){
         int temp = getch();
         switch(temp){
 
             // Processing the read character
+            
             case ('\n'):{if (show != 2) printf("\n"); str.start->value = 'N'; goto end;}
             case (EOF):{str.start->value = 'L'; goto end;}
-            case (127):{                              // ASCII for Backspace
+            case (127):{                             		// ASCII for Backspace
                 if (current == str.start) {str.start->value = 'R'; goto end;}
-                printf("\b \b");
+                if (current->prev->value == '\t') printf("\b\b\b\b");
+                else printf("\b");
                 current->next->prev = current->prev;
                 current->prev->next = current->next;
                 mediator = current; current = current->prev; 
@@ -29,9 +39,19 @@ string editstr(string str, int j, int show){
                 insert(str, show, i, j);
                 break;
             } 
-            case (27):{                               // 27 is ASCII for ESC character
+            case ('\t'):{
+            	for (int k = 0; k < 4; k++){
+                	mediator = (node*) malloc(sizeof(node));
+                	mediator->next = current->next; mediator->prev = current;
+                	current = current->next = (current->next)->prev = mediator;
+                	current->value = ' ';
+                	insert(str, show, i, j);
+                	i++;j++;
+            	}
+            }
+            case (27):{		                               // 27 is ASCII for ESC character
                 temp = getch();
-                if (temp == 91){                                // 91 is ASCII for [ character
+                if (temp == 91){       	                       // 91 is ASCII for [ character
                     switch(temp = getch()){
                         case (67):{
                             if (current->next == str.end) continue;
@@ -73,8 +93,9 @@ string editstr(string str, int j, int show){
             }
 
             // Adding and printing the processed character
+            
             default:{
-                mediator = (node*) malloc(sizeof(node));
+                mediator = malloc(sizeof(node));
                 mediator->next = current->next; mediator->prev = current;
                 current = current->next = (current->next)->prev = mediator;
                 current->value = temp;
@@ -104,10 +125,9 @@ string getstr(char *msg, int show){        // SHOW: 0->Password 1->Normal text  
 
 void insert(string str, int show, int i, int j){
     if (show == 1){
-        for (int k = 0; k <(i-j +1); k++) printf("\033[C");
-        for (int k = 0; k < (i+1); k++) printf("\b \b");
+        for (int k = 0; k <j; k++) printf("\033[D");
         str.end->value = '\0';
-        strprint(str);
+        strprint(str); printf("\t\b\b\b\b");
         str.end->value = '\n';
         for (int k = 0; k < (i-j); k++) printf("\b"); // \b char moves the cursor back one space
     }
@@ -149,10 +169,10 @@ void strprint(string str){
 string initstr(){
     string str;
     do
-    str.start = (node*) malloc(sizeof(node));
+    str.start = malloc(sizeof(node));
     while (str.start == NULL);
     do 
-    str.end = (node*) malloc(sizeof(node));
+    str.end = malloc(sizeof(node));
     while (str.end == NULL);   
     str.start->next = str.end; str.end->prev = str.start;
     str.start->prev = str.end->next = NULL; 
@@ -185,4 +205,31 @@ string breakstr(string *str, int j){
     str->end = end; str->cursor = str->length = j;
     str2.start = start; 
     return str2;
+}
+
+//      -----------------------------------------to_char()-----------------------------------------
+
+char* to_char(string str){
+    char* sr = malloc(str.length + 1);
+    int len = str.length; node* current = str.start->next;
+    for (int i = 0; i < len ; i ++){
+        sr[i] = current->value;
+        current = current->next;
+    }
+    sr[len] = '\0';
+    return sr;
+}
+
+string to_string(char *str){
+    char temp = str[0]; int i = 0;
+    string s = initstr(); node *current = s.start, *mediator = NULL;
+    while(str[i] != '\0' && str[i] != '\n'){
+        do {mediator = malloc(sizeof(node));}
+        while(mediator == NULL);
+        mediator->value = str[i]; mediator->prev = current; mediator->next = current->next;
+        current = current->next = current->next->prev = mediator;
+        s.cursor++; s.length++;
+        i++;
+    }
+    return s;
 }

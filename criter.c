@@ -1,6 +1,6 @@
-#ifndef __MYFUNCS
-#include "MyFuncs.h"
-#endif
+#include "__text.h"
+#include <unistd.h>
+#include <stdio.h>
 
 int main(int argc, char* argv[]){
     if (argc < 2){
@@ -29,14 +29,17 @@ int main(int argc, char* argv[]){
     }
     txt = editxt(txt, txt.lines, 1);
     fd = fopen(argv[1], "w");
-    temp = stdout; stdout = fd;
-    (txt.end->prev->value).end->value = '\0';
-    printxt(txt);
-    (txt.end->prev->value).end->value = '\n';
-    stdout = temp;
+    save(fd, txt);
     printf("=======================================================================\n");
     printf("Your buffer was sucessfully saved.\n");
     freetxt(txt);
     fclose(fd);
 }
 
+void save(FILE* fd, text txt){
+    FILE* temp = stdout; stdout = fd;
+    (txt.end->prev->value).end->value = '\0';
+    printxt(txt);
+    (txt.end->prev->value).end->value = '\n';
+    stdout = temp;
+}

@@ -1,7 +1,7 @@
-#ifndef __MYFUNCS
-#include "MyFuncs.h"
-#endif
-
+#include  "__io.h"
+#include <stdio.h>
+#include <termios.h>
+#include <unistd.h>
 
 int getch(){
     struct termios updated, old;

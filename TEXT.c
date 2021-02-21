@@ -1,6 +1,9 @@
-#ifndef __MYFUNCS
-#include "MyFuncs.h"
-#endif
+#include "__text.h"
+
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+
 
 //  --------------------------------------  editxt()  ------------------------------------------------
 
