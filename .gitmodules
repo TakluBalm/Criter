@@ -1,0 +1,3 @@
+[submodule "Mylib"]
+	path = Mylib
+	url = git@github.com:TakluBalm/Mylib
