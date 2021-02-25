@@ -1,13 +1,15 @@
-#include "__text.h"
+#include <__text.h>
 #include <unistd.h>
 #include <stdio.h>
+
+void save(FILE* fd, text txt);
 
 int main(int argc, char* argv[]){
     if (argc < 2){
         printf("Syntax: criter [filename]\n");
         return 1;
     }
-    printf("\033[D\033[J");
+    printf("\033[H\033[J");
     if (argc > 2) printf("Only the the first argument will be considered.\n\n");
     printf("Opening %s ...\n", argv[1]);
     FILE *fd = fopen(argv[1], "r"), *temp;
