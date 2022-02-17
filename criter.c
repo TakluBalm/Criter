@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include <stdio.h>
 
+void save(FILE* fd, text txt);
+
 int main(int argc, char* argv[]){
     if (argc < 2){
         printf("Syntax: criter [filename]\n");

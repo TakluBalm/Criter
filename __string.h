@@ -1,5 +1,4 @@
 #ifndef __MY_STRING
-
 #define __MY_STRING
 
 //      Custom structs

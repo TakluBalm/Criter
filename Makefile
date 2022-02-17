@@ -1,40 +1,20 @@
-CC=clang
-FLAGS=-fPIC -shared -lc
+CC=gcc
+LIB_FLAGS=-fPIC -shared -g
+CRITER_FLAGS=-g -L. -lMyFuncs
+LIB_FILES=IO.c TEXT.c STRING.c
+CRITER_FILES=criter.c
+FINAL=criter
 
-all: text
+lib: $(LIB_FILES)
+	$(CC) $(LIB_FLAGS) $(LIB_FILES) -o libMyFuncs.so 
 
-test: text check
-	$(CC) -g test.c -L. -lMyFuncs
-	./a.out
-	rm a.out
-	make replace
+criter: $(CRITER) $(LIB_FILES)
+	make lib
+	$(CC) $(CRITER_FLAGS) $(CRITER_FILES) -o $(FINAL)
 
-io: __io.h IO.c
-	$(CC) $(FLAGS) -o libMyFuncs.so IO.c
-
-string: __string.h STRING.c io
-	$(CC) $(FLAGS) -o libMyFuncs.so	IO.c STRING.c -L. -lMyFuncs
-
-text: __text.h TEXT.c string
-	$(CC) $(FLAGS) -o libMyFuncs.so IO.c STRING.c TEXT.c -L. -lMyFuncs
-
-check:
-	sudo mv /lib/x86_64-linux-gnu/libMyFuncs.so original.so
-	sudo mv libMyFuncs.so /lib/x86_64-linux-gnu/libMyFuncs.so
-
-replace:
-	sudo mv /lib/x86_64-linux-gnu/libMyFuncs.so libMyFuncs.so
-	sudo mv original.so /lib/x86_64-linux-gnu/libMyFuncs.so
+test: $(FINAL)
+	export LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH
+	./$(FINAL) test.txt
 
 remove:
-	rm *.so *.o
-
-submit:
-	sudo mv libMyFuncs.so /lib/x86_64-linux-gnu/libMyFuncs.so | rm original.so 
-
-mv_hdr: *.h
-	for file in $^;						\
-	do									\
-	sudo cp $$file /usr/include/$$file;	\
-	done
-	
+	rm *.so

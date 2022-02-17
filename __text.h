@@ -1,8 +1,7 @@
 #ifndef __MY_TEXT
+#define __MY_TEXT
 
 #include "__string.h"
-
-#define __MY_TEXT
 
 //      Custom structs
 
